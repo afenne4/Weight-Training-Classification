@@ -37,8 +37,18 @@ fit_test<-read.csv("fittest.csv",stringsAsFactors = FALSE)
 
 ```
 
-```{r examine missing data}
+```{r unique values}
+uniq<-apply(fit_train,2,unique)
+lapply(uniq,head)
+```
 
+```{r replace spaces with NA}
+fit_train<-fit_train%>%na_if("")
+fit_test<-fit_test%>%na_if("")
+
+```
+
+```{r examine missing data}
 colSums(is.na(fit_train))
 ```
 
@@ -48,9 +58,10 @@ ahead and remove these.
 ```{r remove missing values}
 trainfilt<-fit_train[,colSums(is.na(fit_train))==0]
 testfilt<-fit_test[,colSums(is.na(fit_test))==0]
+
 ```
 
-```{r}
-uniq<-apply(trainfilt,2,unique)
-lapply(uniq,head)
-```
+
+
+
+
