@@ -2,29 +2,55 @@
 title: "index"
 author: "Alex Fennell"
 date: "4/10/2022"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    self_contained: true
+  github_document:
+    toc: true
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r libraries}
+library(randomForest)
+library(e1071)
+library(doParallel)
+library(parallel)
+library(caret)
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r data loadin}
+fileurl<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+if (!file.exists("fittrain.csv")){
+    download.file(fileurl,"fittrain.csv",method="curl")
+}
+fileurl<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+if (!file.exists("fittest.csv")){
+    download.file(fileurl,"fittest.csv",method="curl")
+}
+fit_train<-read.csv("fittrain.csv",stringsAsFactors = FALSE)
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+fit_test<-read.csv("fittest.csv",stringsAsFactors = FALSE)
 
-```{r cars}
-summary(cars)
 ```
 
-## Including Plots
+```{r examine missing data}
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+colSums(is.na(fit_train))
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Given a good number of these variables are columns of missing values, I will go 
+ahead and remove these.
+
+```{r remove missing values}
+trainfilt<-fit_train[,colSums(is.na(fit_train))==0]
+testfilt<-fit_test[,colSums(is.na(fit_test))==0]
+```
+
+```{r}
+uniq<-apply(trainfilt,2,unique)
+lapply(uniq,head)
+```
