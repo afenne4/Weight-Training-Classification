@@ -45,7 +45,6 @@ lapply(uniq,head)
 ```{r replace spaces with NA}
 fit_train<-fit_train%>%na_if("")
 fit_test<-fit_test%>%na_if("")
-
 ```
 
 ```{r examine missing data}
@@ -61,6 +60,14 @@ testfilt<-fit_test[,colSums(is.na(fit_test))==0]
 
 ```
 
+Remove columns that contain time series data. I will only be using the data from the
+accelerometers.
+
+```{r remove timeseries data}
+trainfilt<-trainfilt[,-c(1,2,3,4,5,6,7)]
+testfilt<-testfilt[,-c(1,2,3,4,5,6,7)]
+
+```
 
 
 
