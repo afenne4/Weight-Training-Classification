@@ -88,6 +88,7 @@ control<-trainControl(method='repeatedcv',
                       allowParallel = TRUE,
                       savePredictions = TRUE,
                       search='random')
+
 for(ntree in seq(200,1000,by=200)){
 rfmod<-train(classe~.,
              data=trainfilt,
