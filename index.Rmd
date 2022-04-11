@@ -67,8 +67,41 @@ accelerometers.
 trainfilt<-trainfilt[,-c(1,2,3,4,5,6,7)]
 testfilt<-testfilt[,-c(1,2,3,4,5,6,7)]
 
+trainfilt$classe<-as.factor(trainfilt$classe)
+```
+
+```{r prepare data for modelling}
+
 ```
 
 
+```{r random forest model fit}
+modlist<-list()
+cluster<-makeCluster(detectCores()/2) # leave some cores to do other things
+registerDoParallel(cluster)
+
+control<-trainControl(method='repeatedcv',
+                      number=10,
+                      repeats=3,
+                      classProbs = TRUE,
+                      summaryFunction = multiClassSummary,
+                      allowParallel = TRUE,
+                      savePredictions = TRUE,
+                      search='random')
+for(ntree in seq(200,1000,by=200)){
+rfmod<-train(classe~.,
+             data=trainfilt,
+             method='rf',
+             ntree=ntree,
+             tuneLength=20,
+             metric='accuracy',
+             trControl=control)
+tree<-toString(ntree)
+modlist[[tree]]<-rfmod
+}
+stopCluster(cluster)
+registerDoSEQ()
+
+```
 
 
