@@ -1,0 +1,108 @@
+---
+    title: "index"
+author: "Alex Fennell"
+date: "4/10/2022"
+output: 
+    html_document:
+    toc: true
+self_contained: true
+github_document:
+    toc: true
+---
+    
+```{r libraries}
+library(randomForest)
+library(e1071)
+library(doParallel)
+library(parallel)
+library(caret)
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+```
+
+
+```{r data loadin}
+fileurl<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+if (!file.exists("fittrain.csv")){
+    download.file(fileurl,"fittrain.csv",method="curl")
+}
+fileurl<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+if (!file.exists("fittest.csv")){
+    download.file(fileurl,"fittest.csv",method="curl")
+}
+fit_train<-read.csv("fittrain.csv",stringsAsFactors = FALSE)
+
+fit_test<-read.csv("fittest.csv",stringsAsFactors = FALSE)
+
+```
+
+```{r unique values}
+uniq<-apply(fit_train,2,unique)
+lapply(uniq,head)
+```
+
+```{r replace spaces with NA}
+fit_train<-fit_train%>%na_if("")
+fit_test<-fit_test%>%na_if("")
+```
+
+```{r examine missing data}
+colSums(is.na(fit_train))
+```
+
+Given a good number of these variables are columns of missing values, I will go 
+ahead and remove these.
+
+```{r remove missing values}
+trainfilt<-fit_train[,colSums(is.na(fit_train))==0]
+testfilt<-fit_test[,colSums(is.na(fit_test))==0]
+
+```
+
+Remove columns that contain time series data. I will only be using the data from the
+accelerometers.
+
+```{r remove timeseries data}
+trainfilt<-trainfilt[,-c(1,2,3,4,5,6,7)]
+testfilt<-testfilt[,-c(1,2,3,4,5,6,7)]
+
+trainfilt$classe<-as.factor(trainfilt$classe)
+```
+
+```{r prepare data for modelling}
+
+```
+
+
+```{r random forest model fit}
+modlist<-list()
+cluster<-makeCluster(detectCores()/2) # leave some cores to do other things
+registerDoParallel(cluster)
+
+control<-trainControl(method='repeatedcv',
+                      number=10,
+                      repeats=3,
+                      classProbs = TRUE,
+                      summaryFunction = multiClassSummary,
+                      allowParallel = TRUE,
+                      savePredictions = TRUE,
+                      search='random')
+
+for(ntree in seq(200,1000,by=200)){
+    rfmod<-train(classe~.,
+                 data=trainfilt,
+                 method='rf',
+                 ntree=ntree,
+                 tuneLength=20,
+                 metric='accuracy',
+                 trControl=control)
+    tree<-toString(ntree)
+    modlist[[tree]]<-rfmod
+}
+stopCluster(cluster)
+registerDoSEQ()
+
+```
+
+
