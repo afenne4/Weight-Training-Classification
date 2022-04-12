@@ -1,7 +1,6 @@
 ---
-    title: "index"
+title: "Weight Training Analysis"
 author: "Alex Fennell"
-date: "4/10/2022"
 output: 
     html_document:
     toc: true
@@ -10,34 +9,32 @@ github_document:
     toc: true
 ---
     
-```{r libraries}
-#library(randomForest)
-#library(e1071)
-#library(doParallel)
-#library(parallel)
+```{r libraries,message=FALSE,warning=FALSE}
+library(randomForest)
+library(e1071)
+library(parallel)
+library(MLmetrics)
+library(foreach)
+library(doParallel)
 library(caret)
 library(dplyr)
 ```
 
 
-```{r data loadin}
+```{r data loading}
+#train data location
 fileurl<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
 if (!file.exists("fittrain.csv")){
     download.file(fileurl,"fittrain.csv",method="curl")
 }
+#test data location
 fileurl<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
 if (!file.exists("fittest.csv")){
     download.file(fileurl,"fittest.csv",method="curl")
 }
-fit_train<-read.csv("fittrain.csv",stringsAsFactors = FALSE,na.strings = c("NA",""))
 
+fit_train<-read.csv("fittrain.csv",na.strings = c("NA",""))
 fit_test<-read.csv("fittest.csv",na.strings = c("NA",""))
-
-```
-
-```{r unique values}
-uniq<-apply(fit_train,2,unique)
-#lapply(uniq,head)
 ```
 
 
@@ -51,8 +48,7 @@ ahead and remove these.
 ```{r remove missing values}
 threshold=.95
 trainfilt<-fit_train[,colSums(is.na(fit_train))<(nrow(fit_train)*threshold)]
-testfilt<-fit_test[,colSums(is.na(fit_test))==(nrow(fit_train)*threshold)]
-
+testfilt<-fit_test[,colSums(is.na(fit_test))<(nrow(fit_test)*threshold)]
 ```
 
 Remove columns that contain time series data. I will only be using the data from the
@@ -65,6 +61,23 @@ testfilt<-testfilt[,-c(1,2,3,4,5,6,7)]
 trainfilt$classe<-as.factor(trainfilt$classe)
 ```
 
+```{r Find multicolinearity}
+library(Hmisc)
+cormat<-trainfilt%>%
+    select_if(is.numeric)%>%
+    as.matrix()%>%
+    rcorr(type='spearman')
+highcor<-findCorrelation(cormat$r,cutoff = 0.75)
+colnames(cormat$r[highcor,highcor])
+```
+
+```{r determine near zero variance}
+nsv<-nearZeroVar(trainfilt,saveMetrics = TRUE)
+sum(nsv$zeroVar==TRUE)
+sum(nsv$nzv==TRUE)
+
+```
+
 ```{r prepare data for modelling}
 samp<-createDataPartition(y=trainfilt$classe,p=.8,list = FALSE)
 training<-trainfilt[samp,]
@@ -73,12 +86,7 @@ validation<-trainfilt[-samp,]
 
 
 ```{r random forest model fit,cache=TRUE}
-library(randomForest)
-library(e1071)
-library(parallel)
-library(MLmetrics)
-library(foreach)
-library(doParallel)
+
 cluster<-makeCluster(detectCores()-6) # leave some cores to do other things
 registerDoParallel(cluster)
 
@@ -93,8 +101,10 @@ control<-trainControl(method='repeatedcv',
                       verboseIter = TRUE)
 trainpre<-preProcess(training,method=c('center','scale','pca'),thresh=.95)
 trainpca<-predict(trainpre,training)
+valpca<-predict(trainpre,validation)
+testpca<-predict(trainpre,testfilt)
 
-
+testpca<-predict(trainpre,test)
     rfmod<-train(classe~.,
                  data=trainpca,
                  method='rf',
@@ -106,26 +116,31 @@ trainpca<-predict(trainpre,training)
 
 stopCluster(cluster)
 registerDoSEQ()
+```
 
+```{r vip plot}
+library(vip)
+vip(rfmod)
+```
+
+```{r examination of pc 15}
+a<-head(sort(trainpre$rotation[,15]),5)
+b<-head(sort(trainpre$rotation[,15],decreasing=TRUE),5)
+data.frame(PCAval=c(a,b))
+```
+
+```{r confusion matrix cross val holdout set}
+confusionMatrix(rfmod)
 ```
 
 
-```{r}
-library('gbm')
-
-control<-trainControl(method='cv',
-                      number=10,
-                      classProbs = TRUE,
-                      summaryFunction = multiClassSummary,
-                      savePredictions = TRUE,
-                      search = "random")
-
-gbmmod<-train(classe~.,
-             data=trainpca,
-             method='gbm',
-             tuneLength=5,
-             trControl=control)  
-
+```{r confusion matrix validation data set}
+confusionMatrix(predict(rfmod,valpca),valpca$classe)
 ```
 
 
+
+```{r model predictions test set}
+rfpred<-predict(rfmod,testpca)
+rfpred
+```
