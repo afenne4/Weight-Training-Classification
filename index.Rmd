@@ -106,14 +106,20 @@ reduce the dimensionality of the data while still retaining the most
 informative aspects of the data.
 
 ## Near Zero Variance
-
+Next I will examine the data set to determine if there are any uniformative
+predictors and remove them if that is the case.
 
 ```{r determine near zero variance}
 nsv<-nearZeroVar(trainfilt,saveMetrics = TRUE)
-sum(nsv$zeroVar==TRUE)
-sum(nsv$nzv==TRUE)
+data.frame(zeroVar=sum(nsv$zeroVar==TRUE), NSV=sum(nsv$nzv==TRUE))
 
 ```
+
+There are no uniformative predictors, so the data is ready for modelling.
+
+## Validation data split
+Before modelling, I split the training data set to include a validation
+set so the model does not overfit.
 
 ```{r prepare data for modelling}
 samp<-createDataPartition(y=trainfilt$classe,p=.8,list = FALSE)
@@ -121,12 +127,19 @@ training<-trainfilt[samp,]
 validation<-trainfilt[-samp,]
 ```
 
+# Model analysis
+The model I am going to use is a random forest model since these typically
+have superior performance when it comes to classification. I am using a
+repeated cross validation procedure with 10 folds, and 3 repeats to get
+a stable model that minimizes overtraining. I will do a grid search to find
+the optimal value for the mtry parameter. This parameter corresponds to the
+number of variables randomly sampled as candidates at each split. I 
+center and scale all the predictors and then do a pca selecting the
+components that account for 95% of the variance. I use a tree size of
+250 as this is enough to produce stable accuracy and is not overly
+computationally intensive.
 
 ```{r random forest model fit,cache=TRUE}
-
-cluster<-makeCluster(detectCores()-6) # leave some cores to do other things
-registerDoParallel(cluster)
-
 control<-trainControl(method='repeatedcv',
                       number=10,
                       repeats = 3,
@@ -134,19 +147,24 @@ control<-trainControl(method='repeatedcv',
                       summaryFunction = multiClassSummary,
                       allowParallel = TRUE,
                       savePredictions = TRUE,
-                      search='random',
+                      search='grid',
                       verboseIter = TRUE)
+tunevals<-expand.grid(.mtry=c(1:10))
+#preprocess all datasets
 trainpre<-preProcess(training,method=c('center','scale','pca'),thresh=.95)
 trainpca<-predict(trainpre,training)
 valpca<-predict(trainpre,validation)
 testpca<-predict(trainpre,testfilt)
 
-testpca<-predict(trainpre,test)
+#Parellelize the random forest process
+cluster<-makeCluster(detectCores()-6) 
+registerDoParallel(cluster)
+set.seed(1234)
     rfmod<-train(classe~.,
                  data=trainpca,
                  method='rf',
                  ntree=250,
-                 tuneLength=10,
+                 tuneGrid=tunevals,
                  verbose=TRUE,
                  metric='Accuracy',
                  trControl=control)
@@ -154,6 +172,17 @@ testpca<-predict(trainpre,test)
 stopCluster(cluster)
 registerDoSEQ()
 ```
+## Optimal mtry 
+This plot shows how the mtry value affects the cross validation accuracy
+for the model.
+
+```{r plot of parameter optimization}
+plot(rfmod)
+```
+
+
+# Variable Importance
+Using the vip plot we can assess what the most valuable predictors are.
 
 ```{r vip plot}
 vip(rfmod)
@@ -165,16 +194,33 @@ b<-head(sort(trainpre$rotation[,15],decreasing=TRUE),5)
 data.frame(PCAmag=c(a,b))
 ```
 
+# Model fit Evaluation
+## Confusion matrix-caret cross validation data set
+To assess the model fit I will be using confusion matrices. First I will
+examine the model fit to the held out resamples in the caret cross
+validation procedure. Then I will examine the model performance against the 
+validation set that I set aside before beginning the modelling.
+
 ```{r confusion matrix cross val holdout set}
 confusionMatrix(rfmod)
 ```
 
+On the cross validation set within the caret procedure, the model is 
+quite accurate with few observations off the diagonals. 
+
+## Confusion matrix-validation data set
 
 ```{r confusion matrix validation data set}
 confusionMatrix(predict(rfmod,valpca),valpca$classe)
 ```
 
+With the validation set the model performs very well with an accuracy of 
+~98%. It has very few values off the diagonal indicating good specificity
+and sensitivity. Thus this model seems to do an excellent job of classifying
+the quality of an exercise based on accelerometer data.
 
+The predicted values for the test set are presented below. These were all 
+correct as indicated by the quiz results.
 
 ```{r model predictions test set}
 rfpred<-predict(rfmod,testpca)
