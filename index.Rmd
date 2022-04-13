@@ -188,13 +188,29 @@ Using the vip plot we can assess what the most valuable predictors are.
 vip(rfmod)
 ```
 
+The most important predictor appears to be PC15, so let's examine that to
+see what this component is capturing.
+
+## Principal Component Analysis
 ```{r examination of pc 15}
 a<-head(sort(trainpre$rotation[,15]),5)
 b<-head(sort(trainpre$rotation[,15],decreasing=TRUE),5)
 data.frame(PCAmag=c(a,b))
 ```
 
-# Model fit Evaluation
+The strongest predictors that were combined in the PC15 component are
+presented in the table above. This component is heavily influenced by 
+gyroscopic information from all the belt directions in addition to the
+magnitude from the belt. The component is also heavily influenced by the 
+forearm acceleration and magnitude in the z and y planes. This makes sense
+that this would be the most important component. Exercise mistakes were 
+based on partial bicep curls, or the involvement of the hips in the curl.
+Thus it should be expected that a component that is dominanted by both
+pieces of information should be the most informative in classifying the 
+quality of the exercise.
+
+
+# Model Fit Evaluation
 ## Confusion matrix-caret cross validation data set
 To assess the model fit I will be using confusion matrices. First I will
 examine the model fit to the held out resamples in the caret cross
