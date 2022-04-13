@@ -137,7 +137,8 @@ number of variables randomly sampled as candidates at each split. I
 center and scale all the predictors and then do a pca selecting the
 components that account for 95% of the variance. I use a tree size of
 250 as this is enough to produce stable accuracy and is not overly
-computationally intensive.
+computationally intensive. Model performance will be assessed on its
+out of sample error rate which is equivalent to 1-Accuracy.
 
 ```{r random forest model fit,cache=TRUE,cache.lazy=TRUE}
 control<-trainControl(method='repeatedcv',
@@ -231,10 +232,12 @@ quite accurate with few observations off the diagonals.
 confusionMatrix(predict(rfmod,valpca),valpca$classe)
 ```
 
+# Conclusion 
 With the validation set the model performs very well with an accuracy of 
-~98%. It has very few values off the diagonal indicating good specificity
-and sensitivity. Thus this model seems to do an excellent job of classifying
-the quality of an exercise based on accelerometer data.
+~98%. Thus the model has an out of sample error of 2 percent. Thus, with
+the test data set the model should make 0 or maybe 1 error given there are
+20 samples in the test set. This model seems to do an excellent job of
+classifying the quality of an exercise based on accelerometer data.
 
 The predicted values for the test set are presented below. These were all 
 correct as indicated by the quiz results.
