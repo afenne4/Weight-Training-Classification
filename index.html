@@ -547,7 +547,7 @@ validation&lt;-trainfilt[-samp,]</code></pre>
 </div>
 <div id="model-analysis" class="section level1">
 <h1>Model analysis</h1>
-<p>The model I am going to use is a random forest model since these typically have superior performance when it comes to classification. I am using a repeated cross validation procedure with 10 folds, and 3 repeats to get a stable model that minimizes overtraining. I will do a grid search to find the optimal value for the mtry parameter. This parameter corresponds to the number of variables randomly sampled as candidates at each split. I center and scale all the predictors and then do a pca selecting the components that account for 95% of the variance. I use a tree size of 250 as this is enough to produce stable accuracy and is not overly computationally intensive.</p>
+<p>The model I am going to use is a random forest model since these typically have superior performance when it comes to classification. I am using a repeated cross validation procedure with 10 folds, and 3 repeats to get a stable model that minimizes overtraining. I will do a grid search to find the optimal value for the mtry parameter. This parameter corresponds to the number of variables randomly sampled as candidates at each split. I center and scale all the predictors and then do a pca selecting the components that account for 95% of the variance. I use a tree size of 250 as this is enough to produce stable accuracy and is not overly computationally intensive. Model performance will be assessed on its out of sample error rate which is equivalent to 1-Accuracy.</p>
 <pre class="r"><code>control&lt;-trainControl(method=&#39;repeatedcv&#39;,
                       number=10,
                       repeats = 3,
@@ -670,13 +670,16 @@ data.frame(PCAmag=c(a,b))</code></pre>
 ## Detection Rate         0.2824   0.1889   0.1690   0.1568   0.1820
 ## Detection Prevalence   0.2852   0.1945   0.1787   0.1588   0.1828
 ## Balanced Accuracy      0.9945   0.9847   0.9788   0.9770   0.9947</code></pre>
-<p>With the validation set the model performs very well with an accuracy of ~98%. It has very few values off the diagonal indicating good specificity and sensitivity. Thus this model seems to do an excellent job of classifying the quality of an exercise based on accelerometer data.</p>
+</div>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>With the validation set the model performs very well with an accuracy of ~98%. Thus the model has an out of sample error of 2 percent. Thus, with the test data set the model should make 0 or maybe 1 error given there are 20 samples in the test set. This model seems to do an excellent job of classifying the quality of an exercise based on accelerometer data.</p>
 <p>The predicted values for the test set are presented below. These were all correct as indicated by the quiz results.</p>
 <pre class="r"><code>rfpred&lt;-predict(rfmod,testpca)
 rfpred</code></pre>
 <pre><code>##  [1] B A A A A E D B A A A C B A E E A B B B
 ## Levels: A B C D E</code></pre>
-</div>
 </div>
 
 
