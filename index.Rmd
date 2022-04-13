@@ -1,5 +1,5 @@
 ---
-title: "Weight Training Analysis"
+title: "Weight Lifting Analysis"
 author: "Alex Fennell"
 output: 
     html_document:
@@ -8,8 +8,22 @@ self_contained: true
 github_document:
     toc: true
 ---
-    
+# Synopsis
+The goal of this project is to correctly classify the quality of physical activity an individual
+carried out based on accelerometer collected from the belt, forearm, arm, and dumbell.
+There were 5 different ways in which the exercise was carried out. It was done either 
+exactly according to the specification (Class A), throwing the elbows to the front (Class B),
+lifting the dumbbell only halfway (Class C), lowering the dumbbell only halfway (Class D) 
+and throwing the hips to the front (Class E). Class A is the correct manner in which
+the exercise should be carried out, while the other classes are common errors. 
+Using the accelerometer data I was able to create a random forest model that classified
+this inoformation into the 5 desired classes with 98 percent accuracy.
+
+
 ```{r libraries,message=FALSE,warning=FALSE}
+library(Hmisc)
+library(vip)
+library(dplyr)
 library(randomForest)
 library(e1071)
 library(parallel)
@@ -17,9 +31,9 @@ library(MLmetrics)
 library(foreach)
 library(doParallel)
 library(caret)
-library(dplyr)
 ```
 
+# Read in the Data
 
 ```{r data loading}
 #train data location
@@ -33,17 +47,24 @@ if (!file.exists("fittest.csv")){
     download.file(fileurl,"fittest.csv",method="curl")
 }
 
+# The data sets had many entries that were spaces ("") and thus I specified these
+# to be missing values (NA)
 fit_train<-read.csv("fittrain.csv",na.strings = c("NA",""))
 fit_test<-read.csv("fittest.csv",na.strings = c("NA",""))
 ```
 
+# Assessing missing data
+The first thing I want to do is assess the amount of missing data, so I know if there
+are certain predictors I should remove, or I should implement an imputation technique.
 
 ```{r examine missing data}
 colSums(is.na(fit_train))
 ```
 
-Given a good number of these variables are columns of missing values, I will go 
-ahead and remove these.
+Given a good number of these predictors are columns of missing values, I will go 
+ahead and remove any predictor that is more than 95% missing values.
+
+## Removing Missing Values
 
 ```{r remove missing values}
 threshold=.95
@@ -51,8 +72,8 @@ trainfilt<-fit_train[,colSums(is.na(fit_train))<(nrow(fit_train)*threshold)]
 testfilt<-fit_test[,colSums(is.na(fit_test))<(nrow(fit_test)*threshold)]
 ```
 
-Remove columns that contain time series data. I will only be using the data from the
-accelerometers.
+## Keeping accelerometer data
+I am only interested in data from the accelerometers, so I will remove columns that contain other information.
 
 ```{r remove timeseries data}
 trainfilt<-trainfilt[,-c(1,2,3,4,5,6,7)]
@@ -61,8 +82,14 @@ testfilt<-testfilt[,-c(1,2,3,4,5,6,7)]
 trainfilt$classe<-as.factor(trainfilt$classe)
 ```
 
+## Correlated Predictors
+The next step in understanding the data is to look at correlations among
+the predictors. If variables are highly related to each other, it may
+be worthwhile to remove them or do some dimensionality reduction such
+as PCA. I use a correlation of .75 here so as to only examine the most
+highly correlated predictors.
+
 ```{r Find multicolinearity}
-library(Hmisc)
 cormat<-trainfilt%>%
     select_if(is.numeric)%>%
     as.matrix()%>%
@@ -70,6 +97,16 @@ cormat<-trainfilt%>%
 highcor<-findCorrelation(cormat$r,cutoff = 0.75)
 colnames(cormat$r[highcor,highcor])
 ```
+
+It is not surprising that there are many correlated predictors given
+that these are complex movements that require coordination from many
+parts of the body. Given this, it seems inappropriate to remove
+variables. Therefore I will go forward with a PCA technique in order to
+reduce the dimensionality of the data while still retaining the most
+informative aspects of the data.
+
+## Near Zero Variance
+
 
 ```{r determine near zero variance}
 nsv<-nearZeroVar(trainfilt,saveMetrics = TRUE)
@@ -119,14 +156,13 @@ registerDoSEQ()
 ```
 
 ```{r vip plot}
-library(vip)
 vip(rfmod)
 ```
 
 ```{r examination of pc 15}
 a<-head(sort(trainpre$rotation[,15]),5)
 b<-head(sort(trainpre$rotation[,15],decreasing=TRUE),5)
-data.frame(PCAval=c(a,b))
+data.frame(PCAmag=c(a,b))
 ```
 
 ```{r confusion matrix cross val holdout set}
