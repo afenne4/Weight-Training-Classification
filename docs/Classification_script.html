@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Alex Fennell" />
+
+
+<title>Weight Training Classification</title>
+
+<script src="site_libs/header-attrs-2.14/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Weight Training Classification</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Navigation</a>
+</li>
+<li>
+  <a href="README.html">README</a>
+</li>
+<li>
+  <a href="Classification_script.html">Weight Training Classification</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Weight Training Classification</h1>
+<h4 class="author">Alex Fennell</h4>
+
+</div>
+
+
+<div id="synopsis" class="section level1">
+<h1>Synopsis</h1>
+<p>The goal of this project is to correctly classify the quality of
+physical activity an individual carried out based on accelerometer
+collected from the belt, forearm, arm, and dumbbell. There were 5
+different ways in which the exercise was carried out. It was done either
+exactly according to the specification (Class A), throwing the elbows to
+the front (Class B), lifting the dumbbell only halfway (Class C),
+lowering the dumbbell only halfway (Class D) and throwing the hips to
+the front (Class E). Class A is the correct manner in which the exercise
+should be carried out, while the other classes are common errors. Using
+the accelerometer data I was able to create a random forest model that
+classified this information into the 5 desired classes with 98 percent
+accuracy.</p>
+<pre class="r"><code>library(Hmisc)
+library(vip)
+library(dplyr)
+library(randomForest)
+library(e1071)
+library(parallel)
+library(MLmetrics)
+library(foreach)
+library(doParallel)
+library(caret)</code></pre>
+</div>
+<div id="read-in-the-data" class="section level1">
+<h1>Read in the Data</h1>
+<pre class="r"><code>#train data location
+fileurl&lt;-&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv&quot;
+if (!file.exists(&quot;fittrain.csv&quot;)){
+    download.file(fileurl,&quot;fittrain.csv&quot;,method=&quot;curl&quot;)
+}
+#test data location
+fileurl&lt;-&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv&quot;
+if (!file.exists(&quot;fittest.csv&quot;)){
+    download.file(fileurl,&quot;fittest.csv&quot;,method=&quot;curl&quot;)
+}
+
+# The data sets had many entries that were spaces (&quot;&quot;) and thus I specified these
+# to be missing values (NA)
+fit_train&lt;-read.csv(&quot;fittrain.csv&quot;,na.strings = c(&quot;NA&quot;,&quot;&quot;))
+fit_test&lt;-read.csv(&quot;fittest.csv&quot;,na.strings = c(&quot;NA&quot;,&quot;&quot;))</code></pre>
+</div>
+<div id="assessing-missing-data" class="section level1">
+<h1>Assessing missing data</h1>
+<p>The first thing I want to do is assess the amount of missing data, so
+I know if there are certain predictors I should remove, or I should
+implement an imputation technique.</p>
+<pre class="r"><code>colSums(is.na(fit_train))</code></pre>
+<pre><code>##                        X                user_name     raw_timestamp_part_1 
+##                        0                        0                        0 
+##     raw_timestamp_part_2           cvtd_timestamp               new_window 
+##                        0                        0                        0 
+##               num_window                roll_belt               pitch_belt 
+##                        0                        0                        0 
+##                 yaw_belt         total_accel_belt       kurtosis_roll_belt 
+##                        0                        0                    19216 
+##      kurtosis_picth_belt        kurtosis_yaw_belt       skewness_roll_belt 
+##                    19216                    19216                    19216 
+##     skewness_roll_belt.1        skewness_yaw_belt            max_roll_belt 
+##                    19216                    19216                    19216 
+##           max_picth_belt             max_yaw_belt            min_roll_belt 
+##                    19216                    19216                    19216 
+##           min_pitch_belt             min_yaw_belt      amplitude_roll_belt 
+##                    19216                    19216                    19216 
+##     amplitude_pitch_belt       amplitude_yaw_belt     var_total_accel_belt 
+##                    19216                    19216                    19216 
+##            avg_roll_belt         stddev_roll_belt            var_roll_belt 
+##                    19216                    19216                    19216 
+##           avg_pitch_belt        stddev_pitch_belt           var_pitch_belt 
+##                    19216                    19216                    19216 
+##             avg_yaw_belt          stddev_yaw_belt             var_yaw_belt 
+##                    19216                    19216                    19216 
+##             gyros_belt_x             gyros_belt_y             gyros_belt_z 
+##                        0                        0                        0 
+##             accel_belt_x             accel_belt_y             accel_belt_z 
+##                        0                        0                        0 
+##            magnet_belt_x            magnet_belt_y            magnet_belt_z 
+##                        0                        0                        0 
+##                 roll_arm                pitch_arm                  yaw_arm 
+##                        0                        0                        0 
+##          total_accel_arm            var_accel_arm             avg_roll_arm 
+##                        0                    19216                    19216 
+##          stddev_roll_arm             var_roll_arm            avg_pitch_arm 
+##                    19216                    19216                    19216 
+##         stddev_pitch_arm            var_pitch_arm              avg_yaw_arm 
+##                    19216                    19216                    19216 
+##           stddev_yaw_arm              var_yaw_arm              gyros_arm_x 
+##                    19216                    19216                        0 
+##              gyros_arm_y              gyros_arm_z              accel_arm_x 
+##                        0                        0                        0 
+##              accel_arm_y              accel_arm_z             magnet_arm_x 
+##                        0                        0                        0 
+##             magnet_arm_y             magnet_arm_z        kurtosis_roll_arm 
+##                        0                        0                    19216 
+##       kurtosis_picth_arm         kurtosis_yaw_arm        skewness_roll_arm 
+##                    19216                    19216                    19216 
+##       skewness_pitch_arm         skewness_yaw_arm             max_roll_arm 
+##                    19216                    19216                    19216 
+##            max_picth_arm              max_yaw_arm             min_roll_arm 
+##                    19216                    19216                    19216 
+##            min_pitch_arm              min_yaw_arm       amplitude_roll_arm 
+##                    19216                    19216                    19216 
+##      amplitude_pitch_arm        amplitude_yaw_arm            roll_dumbbell 
+##                    19216                    19216                        0 
+##           pitch_dumbbell             yaw_dumbbell   kurtosis_roll_dumbbell 
+##                        0                        0                    19216 
+##  kurtosis_picth_dumbbell    kurtosis_yaw_dumbbell   skewness_roll_dumbbell 
+##                    19216                    19216                    19216 
+##  skewness_pitch_dumbbell    skewness_yaw_dumbbell        max_roll_dumbbell 
+##                    19216                    19216                    19216 
+##       max_picth_dumbbell         max_yaw_dumbbell        min_roll_dumbbell 
+##                    19216                    19216                    19216 
+##       min_pitch_dumbbell         min_yaw_dumbbell  amplitude_roll_dumbbell 
+##                    19216                    19216                    19216 
+## amplitude_pitch_dumbbell   amplitude_yaw_dumbbell     total_accel_dumbbell 
+##                    19216                    19216                        0 
+##       var_accel_dumbbell        avg_roll_dumbbell     stddev_roll_dumbbell 
+##                    19216                    19216                    19216 
+##        var_roll_dumbbell       avg_pitch_dumbbell    stddev_pitch_dumbbell 
+##                    19216                    19216                    19216 
+##       var_pitch_dumbbell         avg_yaw_dumbbell      stddev_yaw_dumbbell 
+##                    19216                    19216                    19216 
+##         var_yaw_dumbbell         gyros_dumbbell_x         gyros_dumbbell_y 
+##                    19216                        0                        0 
+##         gyros_dumbbell_z         accel_dumbbell_x         accel_dumbbell_y 
+##                        0                        0                        0 
+##         accel_dumbbell_z        magnet_dumbbell_x        magnet_dumbbell_y 
+##                        0                        0                        0 
+##        magnet_dumbbell_z             roll_forearm            pitch_forearm 
+##                        0                        0                        0 
+##              yaw_forearm    kurtosis_roll_forearm   kurtosis_picth_forearm 
+##                        0                    19216                    19216 
+##     kurtosis_yaw_forearm    skewness_roll_forearm   skewness_pitch_forearm 
+##                    19216                    19216                    19216 
+##     skewness_yaw_forearm         max_roll_forearm        max_picth_forearm 
+##                    19216                    19216                    19216 
+##          max_yaw_forearm         min_roll_forearm        min_pitch_forearm 
+##                    19216                    19216                    19216 
+##          min_yaw_forearm   amplitude_roll_forearm  amplitude_pitch_forearm 
+##                    19216                    19216                    19216 
+##    amplitude_yaw_forearm      total_accel_forearm        var_accel_forearm 
+##                    19216                        0                    19216 
+##         avg_roll_forearm      stddev_roll_forearm         var_roll_forearm 
+##                    19216                    19216                    19216 
+##        avg_pitch_forearm     stddev_pitch_forearm        var_pitch_forearm 
+##                    19216                    19216                    19216 
+##          avg_yaw_forearm       stddev_yaw_forearm          var_yaw_forearm 
+##                    19216                    19216                    19216 
+##          gyros_forearm_x          gyros_forearm_y          gyros_forearm_z 
+##                        0                        0                        0 
+##          accel_forearm_x          accel_forearm_y          accel_forearm_z 
+##                        0                        0                        0 
+##         magnet_forearm_x         magnet_forearm_y         magnet_forearm_z 
+##                        0                        0                        0 
+##                   classe 
+##                        0</code></pre>
+<p>Given a good number of these predictors are columns of missing
+values, I will go ahead and remove any predictor that is more than 95%
+missing values.</p>
+<div id="removing-missing-values" class="section level2">
+<h2>Removing Missing Values</h2>
+<pre class="r"><code>threshold=.95
+trainfilt&lt;-fit_train[,colSums(is.na(fit_train))&lt;(nrow(fit_train)*threshold)]
+testfilt&lt;-fit_test[,colSums(is.na(fit_test))&lt;(nrow(fit_test)*threshold)]</code></pre>
+</div>
+<div id="keeping-accelerometer-data" class="section level2">
+<h2>Keeping accelerometer data</h2>
+<p>I am only interested in data from the accelerometers, so I will
+remove columns that contain other information.</p>
+<pre class="r"><code>trainfilt&lt;-trainfilt[,-c(1,2,3,4,5,6,7)]
+testfilt&lt;-testfilt[,-c(1,2,3,4,5,6,7)]
+
+trainfilt$classe&lt;-as.factor(trainfilt$classe)
+testfilt$classe&lt;-as.factor(testfilt$classe)</code></pre>
+</div>
+<div id="correlated-predictors" class="section level2">
+<h2>Correlated Predictors</h2>
+<p>The next step in understanding the data is to look at correlations
+among the predictors. If variables are highly related to each other, it
+may be worthwhile to remove them or do some dimensionality reduction
+such as PCA. I use a correlation of .75 here so as to only examine the
+most highly correlated predictors.</p>
+<pre class="r"><code>cormat&lt;-trainfilt%&gt;%
+    select_if(is.numeric)%&gt;%
+    as.matrix()%&gt;%
+    rcorr(type=&#39;spearman&#39;)
+highcor&lt;-findCorrelation(cormat$r,cutoff = 0.75)
+colnames(cormat$r[highcor,highcor])</code></pre>
+<pre><code>##  [1] &quot;accel_belt_z&quot;     &quot;accel_dumbbell_z&quot; &quot;accel_belt_y&quot;     &quot;yaw_belt&quot;        
+##  [5] &quot;accel_dumbbell_y&quot; &quot;roll_belt&quot;        &quot;magnet_belt_x&quot;    &quot;pitch_belt&quot;      
+##  [9] &quot;accel_dumbbell_x&quot; &quot;magnet_belt_y&quot;    &quot;accel_arm_x&quot;      &quot;magnet_arm_y&quot;    
+## [13] &quot;gyros_arm_x&quot;</code></pre>
+<p>It is not surprising that there are many correlated predictors given
+that these are complex movements that require coordination from many
+parts of the body. Given this, it seems inappropriate to remove
+variables. Therefore I will go forward with a PCA technique in order to
+reduce the dimensionality of the data while still retaining the most
+informative aspects of the data.</p>
+</div>
+<div id="near-zero-variance" class="section level2">
+<h2>Near Zero Variance</h2>
+<p>Next I will examine the data set to determine if there are any
+uniformative predictors and remove them if that is the case.</p>
+<pre class="r"><code>nsv&lt;-nearZeroVar(trainfilt,saveMetrics = TRUE)
+data.frame(zeroVar=sum(nsv$zeroVar==TRUE), NSV=sum(nsv$nzv==TRUE))</code></pre>
+<pre><code>##   zeroVar NSV
+## 1       0   0</code></pre>
+<p>There are no uniformative predictors, so the data is ready for
+modelling.</p>
+</div>
+<div id="validation-data-split" class="section level2">
+<h2>Validation data split</h2>
+<p>Before modelling, I split the training data set to include a
+validation set so the model does not overfit.</p>
+<pre class="r"><code>set.seed(1234)
+samp&lt;-createDataPartition(y=trainfilt$classe,p=.8,list = FALSE)
+training&lt;-trainfilt[samp,]
+validation&lt;-trainfilt[-samp,]</code></pre>
+</div>
+</div>
+<div id="model-analysis" class="section level1">
+<h1>Model analysis</h1>
+<p>The model I am going to use is a random forest model since these
+typically have superior performance when it comes to classification. I
+am using a repeated cross validation procedure with 10 folds, and 3
+repeats to get a stable model that minimizes overtraining. I will do a
+grid search to find the optimal value for the mtry parameter. This
+parameter corresponds to the number of variables randomly sampled as
+candidates at each split. I center and scale all the predictors and then
+do a pca selecting the components that account for 95% of the variance.
+I use a tree size of 250 as this is enough to produce stable accuracy
+and is not overly computationally intensive. Model performance will be
+assessed on its out of sample error rate which is equivalent to
+1-Accuracy.</p>
+<div id="data-preprocessing" class="section level2">
+<h2>Data Preprocessing</h2>
+<pre class="r"><code>control&lt;-trainControl(method=&#39;repeatedcv&#39;,
+                      number=10,
+                      repeats = 3,
+                      classProbs = TRUE,
+                      summaryFunction = multiClassSummary,
+                      allowParallel = TRUE,
+                      savePredictions = TRUE,
+                      search=&#39;grid&#39;,
+                      verboseIter = TRUE)
+tunevals&lt;-expand.grid(.mtry=c(1:10))
+#preprocess all datasets
+trainpre&lt;-preProcess(training,method=c(&#39;center&#39;,&#39;scale&#39;,&#39;pca&#39;),thresh=.95)
+trainpca&lt;-predict(trainpre,training)
+valpca&lt;-predict(trainpre,validation)
+testpca&lt;-predict(trainpre,testfilt)</code></pre>
+</div>
+<div id="random-forest-model-fit" class="section level2">
+<h2>Random Forest Model Fit</h2>
+<pre class="r"><code>#Parellelize the random forest process
+cluster&lt;-makeCluster(detectCores()-6) 
+registerDoParallel(cluster)
+set.seed(1234)
+    rfmod&lt;-train(classe~.,
+                 data=trainpca,
+                 method=&#39;rf&#39;,
+                 ntree=250,
+                 tuneGrid=tunevals,
+                 verbose=TRUE,
+                 metric=&#39;Accuracy&#39;,
+                 trControl=control)</code></pre>
+<pre><code>## Aggregating results
+## Selecting tuning parameters
+## Fitting mtry = 3 on full training set</code></pre>
+<pre class="r"><code>stopCluster(cluster)
+registerDoSEQ()</code></pre>
+</div>
+<div id="optimal-mtry" class="section level2">
+<h2>Optimal mtry</h2>
+<p>This plot shows how the mtry value affects the cross validation
+accuracy for the model.</p>
+<pre class="r"><code>plot(rfmod)</code></pre>
+<p><img src="Classification_script_files/figure-html/plot%20of%20parameter%20optimization-1.png" width="672" /></p>
+<p>This plot shows that an mtry value of 3 results in the highest
+accuracy on the held out cross validation sets.</p>
+</div>
+</div>
+<div id="variable-importance" class="section level1">
+<h1>Variable Importance</h1>
+<p>Using the vip plot we can assess what the most valuable predictors
+are.</p>
+<pre class="r"><code>vip(rfmod)</code></pre>
+<p><img src="Classification_script_files/figure-html/vip%20plot-1.png" width="672" /></p>
+<p>The most important predictor appears to be PC8, so let’s examine that
+to see what this component is capturing.</p>
+<div id="principal-component-analysis" class="section level2">
+<h2>Principal Component Analysis</h2>
+<pre class="r"><code>a&lt;-head(sort(trainpre$rotation[,8]),5)
+b&lt;-head(sort(trainpre$rotation[,8],decreasing=TRUE),5)
+data.frame(PCAmag=c(a,b))</code></pre>
+<pre><code>##                          PCAmag
+## magnet_forearm_x    -0.35965770
+## total_accel_arm     -0.34164545
+## accel_forearm_x     -0.27070534
+## total_accel_belt    -0.09454764
+## accel_belt_y        -0.08687231
+## roll_dumbbell        0.30059635
+## pitch_dumbbell       0.27487550
+## accel_arm_z          0.26947126
+## pitch_forearm        0.26896132
+## total_accel_forearm  0.24371302</code></pre>
+<p>The strongest predictors that were combined in the PC8 component are
+presented in the table above. This component is heavily influenced by
+gyroscopic information from the dumbbell, arm and forearm in mainly the
+x and y planes. There is also some influence from the gyroscopic
+information of the belt in the z direction. This makes sense that this
+would be the most important component. Exercise mistakes were based on
+partial bicep curls, or the involvement of the hips in the curl. Thus it
+should be expected that a component that is dominated by information
+from the arm/forearm/dumbbell and some from the belt should be the most
+informative in classifying the quality of the exercise.</p>
+</div>
+</div>
+<div id="model-fit-evaluation" class="section level1">
+<h1>Model Fit Evaluation</h1>
+<div id="confusion-matrix-caret-cross-validation-data-set"
+class="section level2">
+<h2>Confusion matrix-caret cross validation data set</h2>
+<p>To assess the model fit I will be using confusion matrices. First I
+will examine the model fit to the held out re-samples in the caret cross
+validation procedure. Then I will examine the model performance against
+the validation set that I set aside before beginning the modelling.</p>
+<pre class="r"><code>confusionMatrix(rfmod)</code></pre>
+<pre><code>## Cross-Validated (10 fold, repeated 3 times) Confusion Matrix 
+## 
+## (entries are percentual average cell counts across resamples)
+##  
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 28.2  0.3  0.1  0.0  0.0
+##          B  0.1 18.8  0.2  0.0  0.1
+##          C  0.1  0.2 17.0  0.7  0.2
+##          D  0.0  0.0  0.2 15.6  0.1
+##          E  0.0  0.0  0.0  0.0 18.0
+##                             
+##  Accuracy (average) : 0.9767</code></pre>
+<p>On the cross validation set within the caret procedure, the model is
+quite accurate with few observations off the diagonals.</p>
+</div>
+<div id="confusion-matrix-validation-data-set" class="section level2">
+<h2>Confusion matrix-validation data set</h2>
+<pre class="r"><code>confusionMatrix(predict(rfmod,valpca),valpca$classe)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 1111   10    1    1    0
+##          B    1  744   12    0    0
+##          C    2    4  657   25    7
+##          D    2    0   12  617    6
+##          E    0    1    2    0  708
+## 
+## Overall Statistics
+##                                          
+##                Accuracy : 0.9781         
+##                  95% CI : (0.973, 0.9824)
+##     No Information Rate : 0.2845         
+##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16      
+##                                          
+##                   Kappa : 0.9723         
+##                                          
+##  Mcnemar&#39;s Test P-Value : NA             
+## 
+## Statistics by Class:
+## 
+##                      Class: A Class: B Class: C Class: D Class: E
+## Sensitivity            0.9955   0.9802   0.9605   0.9596   0.9820
+## Specificity            0.9957   0.9959   0.9883   0.9939   0.9991
+## Pos Pred Value         0.9893   0.9828   0.9453   0.9686   0.9958
+## Neg Pred Value         0.9982   0.9953   0.9916   0.9921   0.9960
+## Prevalence             0.2845   0.1935   0.1744   0.1639   0.1838
+## Detection Rate         0.2832   0.1897   0.1675   0.1573   0.1805
+## Detection Prevalence   0.2863   0.1930   0.1772   0.1624   0.1812
+## Balanced Accuracy      0.9956   0.9881   0.9744   0.9767   0.9905</code></pre>
+<pre class="r"><code>rfpred&lt;-predict(rfmod,testpca)
+# Calculate accuracy on the test set
+sum(rfpred==testfilt$classe)/nrow(testfilt)*100</code></pre>
+<pre><code>## [1] 100</code></pre>
+</div>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>With the validation set the model performs very well with an accuracy
+of ~98%. Thus the model has an out of sample error of 2 percent. Given
+the small size of the test set, the model performs with 100 percent
+accuracy. Thus this accelerometer data serves as an excellent source of
+information to classify the quality of an exercise.</p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
