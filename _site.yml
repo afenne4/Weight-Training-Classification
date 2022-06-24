@@ -1,0 +1,14 @@
+  name: "Weight Training Classification"
+  output_dir: "docs"
+  navbar:
+    title: "Weight Training Classification"
+    left:
+    - text: "Navigation"
+      href: index.html
+    - text: "README"
+      href: README.html
+    - text: "Weight Training Classification"
+      href: Classification_script.html
+  output:
+    html_document:
+      theme: cosmo
