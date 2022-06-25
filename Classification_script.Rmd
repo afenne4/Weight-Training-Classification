@@ -1,5 +1,5 @@
 ---
-title: "Classification Script"
+title: "Weight Training Classification"
 author: "Alex Fennell"
 output: html_document
 ---
@@ -54,7 +54,7 @@ The first thing I want to do is assess the amount of missing data, so I know if 
 are certain predictors I should remove, or I should implement an imputation technique.
 
 ```{r examine missing data}
-colSums(is.na(fit_train))
+head(colSums(is.na(fit_train)),n=20)
 ```
 
 Given a good number of these predictors are columns of missing values, I will go 
@@ -69,7 +69,9 @@ testfilt<-fit_test[,colSums(is.na(fit_test))<(nrow(fit_test)*threshold)]
 ```
 
 ## Keeping accelerometer data
-I am only interested in data from the accelerometers, so I will remove columns that contain other information.
+I am only using data from the accelerometers, as I am interested in assessing whether
+the acelerometers alone are enough to classify the quality with which an exercise
+is carried out. As a result, I will remove columns that contain other information.
 
 ```{r remove timeseries data}
 trainfilt<-trainfilt[,-c(1,2,3,4,5,6,7)]
@@ -84,14 +86,14 @@ testfilt$classe<-as.factor(testfilt$classe)
 The next step in understanding the data is to look at correlations among
 the predictors. If variables are highly related to each other, it may
 be worthwhile to remove them or do some dimensionality reduction such
-as PCA. I use a correlation of .75 here so as to only examine the most
+as PCA. I use a correlation threshold of .75 here so as to only examine the most
 highly correlated predictors.
 
 ```{r Find multicolinearity}
 cormat<-trainfilt%>%
     select_if(is.numeric)%>%
     as.matrix()%>%
-    rcorr(type='spearman')
+    rcorr(type='pearson')
 highcor<-findCorrelation(cormat$r,cutoff = 0.75)
 colnames(cormat$r[highcor,highcor])
 ```
@@ -104,7 +106,7 @@ reduce the dimensionality of the data while still retaining the most
 informative aspects of the data.
 
 ## Near Zero Variance
-Next I will examine the data set to determine if there are any uniformative
+Next I will examine the data set to determine if there are any uninformative
 predictors and remove them if that is the case.
 
 ```{r determine near zero variance}
@@ -113,7 +115,7 @@ data.frame(zeroVar=sum(nsv$zeroVar==TRUE), NSV=sum(nsv$nzv==TRUE))
 
 ```
 
-There are no uniformative predictors, so the data is ready for modelling.
+There are no uninformative predictors, so the data is ready for modelling.
 
 ## Validation data split
 Before modelling, I split the training data set to include a validation
@@ -137,7 +139,7 @@ center and scale all the predictors and then do a pca selecting the
 components that account for 95% of the variance. I use a tree size of
 250 as this is enough to produce stable accuracy and is not overly
 computationally intensive. Model performance will be assessed on its
-out of sample error rate which is equivalent to 1-Accuracy.
+accuracy.
 
 ## Data Preprocessing
 ```{r random forest model preprocessing}
@@ -224,7 +226,7 @@ and some from the belt should be the most informative in classifying the
 quality of the exercise.
 
 # Model Fit Evaluation
-## Confusion matrix-caret cross validation data set
+## Confusion matrix-caret hold out cross validation data set
 To assess the model fit I will be using confusion matrices. First I will
 examine the model fit to the held out re-samples in the caret cross
 validation procedure. Then I will examine the model performance against the 
@@ -242,6 +244,12 @@ quite accurate with few observations off the diagonals.
 ```{r confusion matrix validation data set}
 confusionMatrix(predict(rfmod,valpca),valpca$classe)
 ```
+
+On the validation dataset the model performs fantastic. The model still achieves
+~98% accuracy with few observations off the diagonal. The sensitivity of the model
+is quite high across all classes with .96 being the lowest. Specificity is .99 across
+all classes. Thus, the model is achieving high accuracy across all classes and is
+not suffering in its ability to classify one movement over another.
 
 ```{r model predictions test set}
 rfpred<-predict(rfmod,testpca)

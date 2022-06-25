@@ -321,115 +321,21 @@ fit_test&lt;-read.csv(&quot;fittest.csv&quot;,na.strings = c(&quot;NA&quot;,&quo
 <p>The first thing I want to do is assess the amount of missing data, so
 I know if there are certain predictors I should remove, or I should
 implement an imputation technique.</p>
-<pre class="r"><code>colSums(is.na(fit_train))</code></pre>
-<pre><code>##                        X                user_name     raw_timestamp_part_1 
-##                        0                        0                        0 
-##     raw_timestamp_part_2           cvtd_timestamp               new_window 
-##                        0                        0                        0 
-##               num_window                roll_belt               pitch_belt 
-##                        0                        0                        0 
-##                 yaw_belt         total_accel_belt       kurtosis_roll_belt 
-##                        0                        0                    19216 
-##      kurtosis_picth_belt        kurtosis_yaw_belt       skewness_roll_belt 
-##                    19216                    19216                    19216 
-##     skewness_roll_belt.1        skewness_yaw_belt            max_roll_belt 
-##                    19216                    19216                    19216 
-##           max_picth_belt             max_yaw_belt            min_roll_belt 
-##                    19216                    19216                    19216 
-##           min_pitch_belt             min_yaw_belt      amplitude_roll_belt 
-##                    19216                    19216                    19216 
-##     amplitude_pitch_belt       amplitude_yaw_belt     var_total_accel_belt 
-##                    19216                    19216                    19216 
-##            avg_roll_belt         stddev_roll_belt            var_roll_belt 
-##                    19216                    19216                    19216 
-##           avg_pitch_belt        stddev_pitch_belt           var_pitch_belt 
-##                    19216                    19216                    19216 
-##             avg_yaw_belt          stddev_yaw_belt             var_yaw_belt 
-##                    19216                    19216                    19216 
-##             gyros_belt_x             gyros_belt_y             gyros_belt_z 
-##                        0                        0                        0 
-##             accel_belt_x             accel_belt_y             accel_belt_z 
-##                        0                        0                        0 
-##            magnet_belt_x            magnet_belt_y            magnet_belt_z 
-##                        0                        0                        0 
-##                 roll_arm                pitch_arm                  yaw_arm 
-##                        0                        0                        0 
-##          total_accel_arm            var_accel_arm             avg_roll_arm 
-##                        0                    19216                    19216 
-##          stddev_roll_arm             var_roll_arm            avg_pitch_arm 
-##                    19216                    19216                    19216 
-##         stddev_pitch_arm            var_pitch_arm              avg_yaw_arm 
-##                    19216                    19216                    19216 
-##           stddev_yaw_arm              var_yaw_arm              gyros_arm_x 
-##                    19216                    19216                        0 
-##              gyros_arm_y              gyros_arm_z              accel_arm_x 
-##                        0                        0                        0 
-##              accel_arm_y              accel_arm_z             magnet_arm_x 
-##                        0                        0                        0 
-##             magnet_arm_y             magnet_arm_z        kurtosis_roll_arm 
-##                        0                        0                    19216 
-##       kurtosis_picth_arm         kurtosis_yaw_arm        skewness_roll_arm 
-##                    19216                    19216                    19216 
-##       skewness_pitch_arm         skewness_yaw_arm             max_roll_arm 
-##                    19216                    19216                    19216 
-##            max_picth_arm              max_yaw_arm             min_roll_arm 
-##                    19216                    19216                    19216 
-##            min_pitch_arm              min_yaw_arm       amplitude_roll_arm 
-##                    19216                    19216                    19216 
-##      amplitude_pitch_arm        amplitude_yaw_arm            roll_dumbbell 
-##                    19216                    19216                        0 
-##           pitch_dumbbell             yaw_dumbbell   kurtosis_roll_dumbbell 
-##                        0                        0                    19216 
-##  kurtosis_picth_dumbbell    kurtosis_yaw_dumbbell   skewness_roll_dumbbell 
-##                    19216                    19216                    19216 
-##  skewness_pitch_dumbbell    skewness_yaw_dumbbell        max_roll_dumbbell 
-##                    19216                    19216                    19216 
-##       max_picth_dumbbell         max_yaw_dumbbell        min_roll_dumbbell 
-##                    19216                    19216                    19216 
-##       min_pitch_dumbbell         min_yaw_dumbbell  amplitude_roll_dumbbell 
-##                    19216                    19216                    19216 
-## amplitude_pitch_dumbbell   amplitude_yaw_dumbbell     total_accel_dumbbell 
-##                    19216                    19216                        0 
-##       var_accel_dumbbell        avg_roll_dumbbell     stddev_roll_dumbbell 
-##                    19216                    19216                    19216 
-##        var_roll_dumbbell       avg_pitch_dumbbell    stddev_pitch_dumbbell 
-##                    19216                    19216                    19216 
-##       var_pitch_dumbbell         avg_yaw_dumbbell      stddev_yaw_dumbbell 
-##                    19216                    19216                    19216 
-##         var_yaw_dumbbell         gyros_dumbbell_x         gyros_dumbbell_y 
-##                    19216                        0                        0 
-##         gyros_dumbbell_z         accel_dumbbell_x         accel_dumbbell_y 
-##                        0                        0                        0 
-##         accel_dumbbell_z        magnet_dumbbell_x        magnet_dumbbell_y 
-##                        0                        0                        0 
-##        magnet_dumbbell_z             roll_forearm            pitch_forearm 
-##                        0                        0                        0 
-##              yaw_forearm    kurtosis_roll_forearm   kurtosis_picth_forearm 
-##                        0                    19216                    19216 
-##     kurtosis_yaw_forearm    skewness_roll_forearm   skewness_pitch_forearm 
-##                    19216                    19216                    19216 
-##     skewness_yaw_forearm         max_roll_forearm        max_picth_forearm 
-##                    19216                    19216                    19216 
-##          max_yaw_forearm         min_roll_forearm        min_pitch_forearm 
-##                    19216                    19216                    19216 
-##          min_yaw_forearm   amplitude_roll_forearm  amplitude_pitch_forearm 
-##                    19216                    19216                    19216 
-##    amplitude_yaw_forearm      total_accel_forearm        var_accel_forearm 
-##                    19216                        0                    19216 
-##         avg_roll_forearm      stddev_roll_forearm         var_roll_forearm 
-##                    19216                    19216                    19216 
-##        avg_pitch_forearm     stddev_pitch_forearm        var_pitch_forearm 
-##                    19216                    19216                    19216 
-##          avg_yaw_forearm       stddev_yaw_forearm          var_yaw_forearm 
-##                    19216                    19216                    19216 
-##          gyros_forearm_x          gyros_forearm_y          gyros_forearm_z 
-##                        0                        0                        0 
-##          accel_forearm_x          accel_forearm_y          accel_forearm_z 
-##                        0                        0                        0 
-##         magnet_forearm_x         magnet_forearm_y         magnet_forearm_z 
-##                        0                        0                        0 
-##                   classe 
-##                        0</code></pre>
+<pre class="r"><code>head(colSums(is.na(fit_train)),n=20)</code></pre>
+<pre><code>##                    X            user_name raw_timestamp_part_1 
+##                    0                    0                    0 
+## raw_timestamp_part_2       cvtd_timestamp           new_window 
+##                    0                    0                    0 
+##           num_window            roll_belt           pitch_belt 
+##                    0                    0                    0 
+##             yaw_belt     total_accel_belt   kurtosis_roll_belt 
+##                    0                    0                19216 
+##  kurtosis_picth_belt    kurtosis_yaw_belt   skewness_roll_belt 
+##                19216                19216                19216 
+## skewness_roll_belt.1    skewness_yaw_belt        max_roll_belt 
+##                19216                19216                19216 
+##       max_picth_belt         max_yaw_belt 
+##                19216                19216</code></pre>
 <p>Given a good number of these predictors are columns of missing
 values, I will go ahead and remove any predictor that is more than 95%
 missing values.</p>
@@ -441,7 +347,9 @@ testfilt&lt;-fit_test[,colSums(is.na(fit_test))&lt;(nrow(fit_test)*threshold)]</
 </div>
 <div id="keeping-accelerometer-data" class="section level2">
 <h2>Keeping accelerometer data</h2>
-<p>I am only interested in data from the accelerometers, so I will
+<p>I am only using data from the accelerometers, as I am interested in
+assessing whether the acelerometers alone are enough to classify the
+quality with which an exercise is carried out. As a result, I will
 remove columns that contain other information.</p>
 <pre class="r"><code>trainfilt&lt;-trainfilt[,-c(1,2,3,4,5,6,7)]
 testfilt&lt;-testfilt[,-c(1,2,3,4,5,6,7)]
@@ -454,18 +362,21 @@ testfilt$classe&lt;-as.factor(testfilt$classe)</code></pre>
 <p>The next step in understanding the data is to look at correlations
 among the predictors. If variables are highly related to each other, it
 may be worthwhile to remove them or do some dimensionality reduction
-such as PCA. I use a correlation of .75 here so as to only examine the
-most highly correlated predictors.</p>
+such as PCA. I use a correlation threshold of .75 here so as to only
+examine the most highly correlated predictors.</p>
 <pre class="r"><code>cormat&lt;-trainfilt%&gt;%
     select_if(is.numeric)%&gt;%
     as.matrix()%&gt;%
-    rcorr(type=&#39;spearman&#39;)
+    rcorr(type=&#39;pearson&#39;)
 highcor&lt;-findCorrelation(cormat$r,cutoff = 0.75)
 colnames(cormat$r[highcor,highcor])</code></pre>
-<pre><code>##  [1] &quot;accel_belt_z&quot;     &quot;accel_dumbbell_z&quot; &quot;accel_belt_y&quot;     &quot;yaw_belt&quot;        
-##  [5] &quot;accel_dumbbell_y&quot; &quot;roll_belt&quot;        &quot;magnet_belt_x&quot;    &quot;pitch_belt&quot;      
-##  [9] &quot;accel_dumbbell_x&quot; &quot;magnet_belt_y&quot;    &quot;accel_arm_x&quot;      &quot;magnet_arm_y&quot;    
-## [13] &quot;gyros_arm_x&quot;</code></pre>
+<pre><code>##  [1] &quot;accel_belt_z&quot;      &quot;roll_belt&quot;         &quot;accel_belt_y&quot;     
+##  [4] &quot;accel_arm_y&quot;       &quot;total_accel_belt&quot;  &quot;accel_dumbbell_z&quot; 
+##  [7] &quot;accel_belt_x&quot;      &quot;pitch_belt&quot;        &quot;magnet_dumbbell_x&quot;
+## [10] &quot;accel_dumbbell_y&quot;  &quot;magnet_dumbbell_y&quot; &quot;accel_arm_x&quot;      
+## [13] &quot;accel_dumbbell_x&quot;  &quot;accel_arm_z&quot;       &quot;magnet_arm_y&quot;     
+## [16] &quot;magnet_belt_z&quot;     &quot;accel_forearm_y&quot;   &quot;gyros_forearm_y&quot;  
+## [19] &quot;gyros_dumbbell_x&quot;  &quot;gyros_dumbbell_z&quot;  &quot;gyros_arm_x&quot;</code></pre>
 <p>It is not surprising that there are many correlated predictors given
 that these are complex movements that require coordination from many
 parts of the body. Given this, it seems inappropriate to remove
@@ -476,12 +387,12 @@ informative aspects of the data.</p>
 <div id="near-zero-variance" class="section level2">
 <h2>Near Zero Variance</h2>
 <p>Next I will examine the data set to determine if there are any
-uniformative predictors and remove them if that is the case.</p>
+uninformative predictors and remove them if that is the case.</p>
 <pre class="r"><code>nsv&lt;-nearZeroVar(trainfilt,saveMetrics = TRUE)
 data.frame(zeroVar=sum(nsv$zeroVar==TRUE), NSV=sum(nsv$nzv==TRUE))</code></pre>
 <pre><code>##   zeroVar NSV
 ## 1       0   0</code></pre>
-<p>There are no uniformative predictors, so the data is ready for
+<p>There are no uninformative predictors, so the data is ready for
 modelling.</p>
 </div>
 <div id="validation-data-split" class="section level2">
@@ -506,8 +417,7 @@ candidates at each split. I center and scale all the predictors and then
 do a pca selecting the components that account for 95% of the variance.
 I use a tree size of 250 as this is enough to produce stable accuracy
 and is not overly computationally intensive. Model performance will be
-assessed on its out of sample error rate which is equivalent to
-1-Accuracy.</p>
+assessed on its accuracy.</p>
 <div id="data-preprocessing" class="section level2">
 <h2>Data Preprocessing</h2>
 <pre class="r"><code>control&lt;-trainControl(method=&#39;repeatedcv&#39;,
@@ -594,9 +504,9 @@ informative in classifying the quality of the exercise.</p>
 </div>
 <div id="model-fit-evaluation" class="section level1">
 <h1>Model Fit Evaluation</h1>
-<div id="confusion-matrix-caret-cross-validation-data-set"
+<div id="confusion-matrix-caret-hold-out-cross-validation-data-set"
 class="section level2">
-<h2>Confusion matrix-caret cross validation data set</h2>
+<h2>Confusion matrix-caret hold out cross validation data set</h2>
 <p>To assess the model fit I will be using confusion matrices. First I
 will examine the model fit to the held out re-samples in the caret cross
 validation procedure. Then I will examine the model performance against
@@ -653,6 +563,12 @@ quite accurate with few observations off the diagonals.</p>
 ## Detection Rate         0.2832   0.1897   0.1675   0.1573   0.1805
 ## Detection Prevalence   0.2863   0.1930   0.1772   0.1624   0.1812
 ## Balanced Accuracy      0.9956   0.9881   0.9744   0.9767   0.9905</code></pre>
+<p>On the validation dataset the model performs fantastic. The model
+still achieves ~98% accuracy with few observations off the diagonal. The
+sensitivity of the model is quite high across all classes with .96 being
+the lowest. Specificity is .99 across all classes. Thus, the model is
+achieving high accuracy across all classes and is not suffering in its
+ability to classify one movement over another.</p>
 <pre class="r"><code>rfpred&lt;-predict(rfmod,testpca)
 # Calculate accuracy on the test set
 sum(rfpred==testfilt$classe)/nrow(testfilt)*100</code></pre>
