@@ -163,8 +163,8 @@ testpca<-predict(trainpre,testfilt)
 ```
 
 ## Random Forest Model Fit
-```{r random forest model fit,cache=TRUE,cache.lazy=TRUE}
-#Parellelize the random forest process
+```{r random forest model fit,cache=TRUE,cache.lazy=TRUE,eval=FALSE}
+#Parallelize the random forest process
 cluster<-makeCluster(detectCores()-6) 
 registerDoParallel(cluster)
 set.seed(1234)
@@ -223,7 +223,6 @@ pcaplot<-traincomp %>%
   facet_wrap(~Component, nrow = 1) +
   labs(y = NULL,
        x="Strength of Contribution")
-#ggsave("pcaplot.png",pcaplot,width=6,height=7,units="in",device = "png")
 pcaplot
 ```
 
@@ -238,7 +237,7 @@ classification. The following plot shows the most informative predictors that co
 to these components to provide a clearer picture of what these components are capturing.
 
 ```{r Most significant predictors in components,fig.width=10}
-traincomp %>%
+pcaplot2<-traincomp %>%
     filter(Component %in% paste0("PC", c(8,14,12,1,5))) %>%
     group_by(Component) %>%
     top_n(8, abs(Magnitude)) %>%
@@ -255,7 +254,8 @@ traincomp %>%
         y = NULL, fill = "Strength of \nContribution"
      ) +
     theme(plot.title=element_text(hjust=.5))
-
+ggsave("pcaplot2.png",pcaplot2,width=8,height=4,units="in",device = "png")
+pcaplot2
 ```
 
 The strongest predictors that were combined in the 5 most informative principal components are
@@ -276,6 +276,17 @@ ggplot(trainpca,aes(x=PC8,y=PC14,color=classe))+
                                  "Half Curl Lower (D)","Hips Front (E)"),
                      type="qual",palette = "Dark2")
 ```
+
+This plot is another way to demonstrate what the two most important principal components 
+are capturing. Since there are so many components and many outcome categories, there are no explicit
+cutoffs where one component perfectly captures one exercise type. Instead there is 
+a much more complex interaction among the components. PC14 does a relatively
+good job of capturing some component of exercises where the hips move forward, and
+the lowering of the dumbbell from halfway. Since PC14 is mainly dominated by gyroscopic
+information from the belt it makes sense that it would be better at classifying these
+two types of activities.
+
+
 # Model Fit Evaluation
 ## Confusion matrix-caret hold out cross validation data set
 To assess the model fit I will be using confusion matrices. First I will
@@ -307,6 +318,7 @@ rfpred<-predict(rfmod,testpca)
 # Calculate accuracy on the test set
 sum(rfpred==testfilt$classe)/nrow(testfilt)*100
 ```
+
 # Conclusion 
 With the validation set the model performs very well with an accuracy of 
 ~98%. Thus the model has an out of sample error of 2 percent. Given the small size

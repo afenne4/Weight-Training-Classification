@@ -289,13 +289,15 @@ classified this information into the 5 desired classes with 98 percent
 accuracy.</p>
 <pre class="r"><code>library(Hmisc)
 library(vip)
-library(dplyr)
 library(randomForest)
 library(e1071)
 library(parallel)
 library(MLmetrics)
 library(foreach)
 library(doParallel)
+library(tidytext)
+library(tidyverse)
+library(reshape2)
 library(caret)</code></pre>
 </div>
 <div id="read-in-the-data" class="section level1">
@@ -438,7 +440,7 @@ testpca&lt;-predict(trainpre,testfilt)</code></pre>
 </div>
 <div id="random-forest-model-fit" class="section level2">
 <h2>Random Forest Model Fit</h2>
-<pre class="r"><code>#Parellelize the random forest process
+<pre class="r"><code>#Parallelize the random forest process
 cluster&lt;-makeCluster(detectCores()-6) 
 registerDoParallel(cluster)
 set.seed(1234)
@@ -449,11 +451,9 @@ set.seed(1234)
                  tuneGrid=tunevals,
                  verbose=TRUE,
                  metric=&#39;Accuracy&#39;,
-                 trControl=control)</code></pre>
-<pre><code>## Aggregating results
-## Selecting tuning parameters
-## Fitting mtry = 3 on full training set</code></pre>
-<pre class="r"><code>stopCluster(cluster)
+                 trControl=control)
+
+stopCluster(cluster)
 registerDoSEQ()</code></pre>
 </div>
 <div id="optimal-mtry" class="section level2">
@@ -476,30 +476,79 @@ are.</p>
 to see what this component is capturing.</p>
 <div id="principal-component-analysis" class="section level2">
 <h2>Principal Component Analysis</h2>
-<pre class="r"><code>a&lt;-head(sort(trainpre$rotation[,8]),5)
-b&lt;-head(sort(trainpre$rotation[,8],decreasing=TRUE),5)
-data.frame(PCAmag=c(a,b))</code></pre>
-<pre><code>##                          PCAmag
-## magnet_forearm_x    -0.35965770
-## total_accel_arm     -0.34164545
-## accel_forearm_x     -0.27070534
-## total_accel_belt    -0.09454764
-## accel_belt_y        -0.08687231
-## roll_dumbbell        0.30059635
-## pitch_dumbbell       0.27487550
-## accel_arm_z          0.26947126
-## pitch_forearm        0.26896132
-## total_accel_forearm  0.24371302</code></pre>
-<p>The strongest predictors that were combined in the PC8 component are
-presented in the table above. This component is heavily influenced by
-gyroscopic information from the dumbbell, arm and forearm in mainly the
-x and y planes. There is also some influence from the gyroscopic
-information of the belt in the z direction. This makes sense that this
-would be the most important component. Exercise mistakes were based on
-partial bicep curls, or the involvement of the hips in the curl. Thus it
-should be expected that a component that is dominated by information
-from the arm/forearm/dumbbell and some from the belt should be the most
-informative in classifying the quality of the exercise.</p>
+<pre class="r"><code># Extract the pca loadings into an objects that will work with ggplot2
+traincomp&lt;-melt(trainpre$rotation)
+colnames(traincomp)&lt;-c(&quot;Original_Var&quot;,&quot;Component&quot;,&quot;Magnitude&quot;)
+
+pcaplot&lt;-traincomp %&gt;%
+  filter(Component %in% paste0(&quot;PC&quot;, c(8,14,12,1,5))) %&gt;%
+  ggplot(aes(Magnitude, Original_Var, fill = Original_Var)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~Component, nrow = 1) +
+  labs(y = NULL,
+       x=&quot;Strength of Contribution&quot;)
+pcaplot</code></pre>
+<p><img src="Classification_script_files/figure-html/pca%20plot-1.png" width="864" /></p>
+<p>This figure shows the five most informative principal components and
+the contributions of each predictor into each principal component. Since
+each component is influenced in some way by each predictor, one way to
+understand what a component is capturing is by examining the tallest
+bars in the plot to see what predictors are contributing the most to
+each component. For example in PC 14 gyroscopic information from the
+belt in the z and y planes are the largest contributors. Given that one
+of the classes of exercises involved movement of the hips it makes sense
+this component would be useful for classification. The following plot
+shows the most informative predictors that contribute to these
+components to provide a clearer picture of what these components are
+capturing.</p>
+<pre class="r"><code>pcaplot2&lt;-traincomp %&gt;%
+    filter(Component %in% paste0(&quot;PC&quot;, c(8,14,12,1,5))) %&gt;%
+    group_by(Component) %&gt;%
+    top_n(8, abs(Magnitude)) %&gt;%
+    ungroup() %&gt;%
+    mutate(Original_Var = reorder_within(Original_Var, abs(Magnitude), Component)) %&gt;%
+    ggplot(aes(abs(Magnitude), Original_Var, fill = Magnitude)) +
+    geom_col() +
+    scale_fill_viridis_c() +
+    facet_wrap(~Component, scales = &quot;free_y&quot;) +
+    scale_y_reordered() +
+    labs(
+         title=&quot;Predictor Contribution  to  Top Five Principal Components&quot;,
+        x = &quot;Absolute value of contribution&quot;,
+        y = NULL, fill = &quot;Strength of \nContribution&quot;
+     ) +
+    theme(plot.title=element_text(hjust=.5))
+ggsave(&quot;pcaplot2.png&quot;,pcaplot2,width=8,height=4,units=&quot;in&quot;,device = &quot;png&quot;)
+pcaplot2</code></pre>
+<p><img src="Classification_script_files/figure-html/Most%20significant%20predictors%20in%20components-1.png" width="960" /></p>
+<p>The strongest predictors that were combined in the 5 most informative
+principal components are presented in the figure above. Green and yellow
+colors indicate positive values, while blue and purple colors indicate
+negative values. The strongest component, PC8, is capturing gyroscopic
+information from the dumbbell, and the overall acceleration in the
+forearm arm and forearm in z plane, vs. overall acceleration of the arm,
+in addition to the magnitude and acceleration of the forearm in the x
+plane. It makes sense that this is the most important component given it
+captures so much information about the dumbbell position and the
+forearm. Both of these are key factors in delineating between correctly
+and incorrectly carrying out the bicep curl.</p>
+<pre class="r"><code>ggplot(trainpca,aes(x=PC8,y=PC14,color=classe))+
+  geom_point(alpha=.3)+
+  scale_color_brewer(name=&quot;Exercise Type&quot;,
+                        labels=c(&quot;Correct (A)&quot;,&quot;Elbows Front (B)&quot;,&quot;Half Curl Lift (C)&quot;,
+                                 &quot;Half Curl Lower (D)&quot;,&quot;Hips Front (E)&quot;),
+                     type=&quot;qual&quot;,palette = &quot;Dark2&quot;)</code></pre>
+<p><img src="Classification_script_files/figure-html/PCA%20components%20together-1.png" width="672" /></p>
+<p>This plot is another way to demonstrate what the two most important
+principal components are capturing. Since there are so many components
+and many outcome categories, there are no explicit cutoffs where one
+component perfectly captures one exercise type. Instead there is a much
+more complex interaction among the components. PC14 does a relatively
+good job of capturing some component of exercises where the hips move
+forward, and the lowering of the dumbbell from halfway. Since PC14 is
+mainly dominated by gyroscopic information from the belt it makes sense
+that it would be better at classifying these two types of
+activities.</p>
 </div>
 </div>
 <div id="model-fit-evaluation" class="section level1">
