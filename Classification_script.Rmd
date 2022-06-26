@@ -27,6 +27,7 @@ library(foreach)
 library(doParallel)
 library(tidytext)
 library(tidyverse)
+library(reshape2)
 library(caret)
 ```
 
@@ -210,9 +211,8 @@ see what this component is capturing.
 
 ## Principal Component Analysis
 
-
-
 ```{r pca plot,fig.height=9,fig.width=9}
+# Extract the pca loadings into an objects that will work with ggplot2
 traincomp<-melt(trainpre$rotation)
 colnames(traincomp)<-c("Original_Var","Component","Magnitude")
 
@@ -227,36 +227,55 @@ pcaplot<-traincomp %>%
 pcaplot
 ```
 
+This figure shows the five most informative principal components and the contributions
+of each predictor into each principal component. Since each component is influenced
+in some way by each predictor, one way to understand what a component is capturing is by
+examining the tallest bars in the plot to see what predictors are contributing the most 
+to each component. For example in PC 14 gyroscopic information from the belt in the
+z and y planes are the largest contributors. Given that one of the classes of exercises
+involved movement of the hips it makes sense this component would be useful for 
+classification. The following plot shows the most informative predictors that contribute
+to these components to provide a clearer picture of what these components are capturing.
 
-```{r}
-library(tidytext)
-
+```{r Most significant predictors in components,fig.width=10}
 traincomp %>%
     filter(Component %in% paste0("PC", c(8,14,12,1,5))) %>%
     group_by(Component) %>%
     top_n(8, abs(Magnitude)) %>%
     ungroup() %>%
-    mutate(terms = reorder_within(Original_Var, abs(Magnitude), Component)) %>%
-    ggplot(aes(abs(Magnitude), Original_Var, fill = Magnitude > 0)) +
+    mutate(Original_Var = reorder_within(Original_Var, abs(Magnitude), Component)) %>%
+    ggplot(aes(abs(Magnitude), Original_Var, fill = Magnitude)) +
     geom_col() +
+    scale_fill_viridis_c() +
     facet_wrap(~Component, scales = "free_y") +
     scale_y_reordered() +
     labs(
+         title="Predictor Contribution  to  Top Five Principal Components",
         x = "Absolute value of contribution",
-        y = NULL, fill = "Positive?"
-     )
+        y = NULL, fill = "Strength of \nContribution"
+     ) +
+    theme(plot.title=element_text(hjust=.5))
 
 ```
 
 The strongest predictors that were combined in the 5 most informative principal components are
-presented in the figure above. The strongest component, PC8, is capturing gyroscopic information 
-from the dumbbell, and the overall acceleration in the forearm arm and forearm in z 
-plane, vs. overall acceleration of the arm, in addition to the magnitude and acceleration 
-of the forearm in the x plane. It makes sense that this is the most important component
-given it captures so much information about the dumbbell position and the forearm.
+presented in the figure above. Green and yellow colors indicate positive values,
+while blue and purple colors indicate negative values. The strongest component, 
+PC8, is capturing gyroscopic information from the dumbbell, and the overall acceleration in the
+forearm arm and forearm in z plane, vs. overall acceleration of the arm, in addition to the magnitude
+and acceleration of the forearm in the x plane. It makes sense that this is the most important
+component given it captures so much information about the dumbbell position and the forearm.
 Both of these are key factors in delineating between correctly and incorrectly carrying
 out the bicep curl.
 
+```{r PCA components together}
+ggplot(trainpca,aes(x=PC8,y=PC14,color=classe))+
+  geom_point(alpha=.3)+
+  scale_color_brewer(name="Exercise Type",
+                        labels=c("Correct (A)","Elbows Front (B)","Half Curl Lift (C)",
+                                 "Half Curl Lower (D)","Hips Front (E)"),
+                     type="qual",palette = "Dark2")
+```
 # Model Fit Evaluation
 ## Confusion matrix-caret hold out cross validation data set
 To assess the model fit I will be using confusion matrices. First I will
