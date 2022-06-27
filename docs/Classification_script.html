@@ -518,7 +518,6 @@ capturing.</p>
         y = NULL, fill = &quot;Strength of \nContribution&quot;
      ) +
     theme(plot.title=element_text(hjust=.5))
-ggsave(&quot;pcaplot2.png&quot;,pcaplot2,width=8,height=4,units=&quot;in&quot;,device = &quot;png&quot;)
 pcaplot2</code></pre>
 <p><img src="Classification_script_files/figure-html/Most%20significant%20predictors%20in%20components-1.png" width="960" /></p>
 <p>The strongest predictors that were combined in the 5 most informative
@@ -547,8 +546,8 @@ more complex interaction among the components. PC14 does a relatively
 good job of capturing some component of exercises where the hips move
 forward, and the lowering of the dumbbell from halfway. Since PC14 is
 mainly dominated by gyroscopic information from the belt it makes sense
-that it would be better at classifying these two types of
-activities.</p>
+that it would be better at classifying these two types of activities. In
+the next section I will examine the quality of the model fits.</p>
 </div>
 </div>
 <div id="model-fit-evaluation" class="section level1">
@@ -575,7 +574,7 @@ the validation set that I set aside before beginning the modelling.</p>
 ##                             
 ##  Accuracy (average) : 0.9767</code></pre>
 <p>On the cross validation set within the caret procedure, the model is
-quite accurate with few observations off the diagonals.</p>
+quite accurate (~97%) with few observations off the diagonals.</p>
 </div>
 <div id="confusion-matrix-validation-data-set" class="section level2">
 <h2>Confusion matrix-validation data set</h2>

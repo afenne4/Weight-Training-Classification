@@ -254,7 +254,6 @@ pcaplot2<-traincomp %>%
         y = NULL, fill = "Strength of \nContribution"
      ) +
     theme(plot.title=element_text(hjust=.5))
-ggsave("pcaplot2.png",pcaplot2,width=8,height=4,units="in",device = "png")
 pcaplot2
 ```
 
@@ -284,7 +283,8 @@ a much more complex interaction among the components. PC14 does a relatively
 good job of capturing some component of exercises where the hips move forward, and
 the lowering of the dumbbell from halfway. Since PC14 is mainly dominated by gyroscopic
 information from the belt it makes sense that it would be better at classifying these
-two types of activities.
+two types of activities. In the next section I will examine the quality of the model
+fits.
 
 
 # Model Fit Evaluation
@@ -299,7 +299,7 @@ confusionMatrix(rfmod)
 ```
 
 On the cross validation set within the caret procedure, the model is 
-quite accurate with few observations off the diagonals. 
+quite accurate (~97%) with few observations off the diagonals. 
 
 ## Confusion matrix-validation data set
 
