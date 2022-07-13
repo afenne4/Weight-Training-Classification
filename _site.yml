@@ -9,6 +9,6 @@
       href: README.html
     - text: "Weight Training Classification"
       href: Classification_script.html
-  output:
+  output: 
     html_document:
-      theme: cosmo
+      theme: united
