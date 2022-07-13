@@ -1,7 +1,7 @@
 ---
 title: "Weight Training Classification"
 author: "Alex Fennell"
-output: html_document
+output: rmdformats::downcute
 ---
 
 # Synopsis
@@ -112,8 +112,8 @@ Next I will examine the data set to determine if there are any uninformative
 predictors and remove them if that is the case.
 
 ```{r determine near zero variance}
-nsv<-nearZeroVar(trainfilt,saveMetrics = TRUE)
-data.frame(zeroVar=sum(nsv$zeroVar==TRUE), NSV=sum(nsv$nzv==TRUE))
+nzv<-nearZeroVar(trainfilt,saveMetrics = TRUE)
+data.frame(zeroVar=sum(nzv$zeroVar==TRUE), NZV=sum(nzv$nzv==TRUE))
 
 ```
 
@@ -199,7 +199,7 @@ plot(rfmod)
 This plot shows that an mtry value of 3 results in the highest accuracy
 on the held out cross validation sets.
 
-# Variable Importance
+## Variable Importance
 Using the vip plot we can assess what the most valuable predictors are.
 
 ```{r vip plot}
