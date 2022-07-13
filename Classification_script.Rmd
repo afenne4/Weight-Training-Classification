@@ -1,7 +1,7 @@
 ---
-title: "Weight Training Classification"
+title: Weight Training Classification
 author: "Alex Fennell"
-output: rmdformats::downcute
+output: rmdformats::readthedown
 ---
 
 # Synopsis

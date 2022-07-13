@@ -11,4 +11,4 @@
       href: Classification_script.html
   output: 
     html_document:
-      theme: united
+      theme: cosmo
